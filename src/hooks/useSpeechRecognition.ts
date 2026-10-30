@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// SpeechRecognition type declarations for Web Speech API
 interface IWindow extends Window {
   webkitSpeechRecognition?: any;
   SpeechRecognition?: any;
@@ -24,12 +23,17 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const recognitionRef = useRef<any>(null);
+  const currentInterimRef = useRef<string>('');
+  const currentFinalRef = useRef<string>('');
+
   const isSupported = typeof window !== 'undefined' && 
     Boolean((window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
     setInterimTranscript('');
+    currentInterimRef.current = '';
+    currentFinalRef.current = '';
     setErrorMessage(null);
   }, []);
 
@@ -40,10 +44,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     const SpeechRecognitionClass = Win.SpeechRecognition || Win.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionClass();
 
-    recognition.continuous = false; // Turn-based conversation
+    recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    recognition.lang = 'en-IN'; // Indian English default, works great for Indian accent
+    recognition.lang = 'en-IN';
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -54,18 +58,22 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       let finalStr = '';
       let interimStr = '';
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalStr += event.results[i][0].transcript;
+      for (let i = 0; i < event.results.length; ++i) {
+        const item = event.results[i];
+        if (item.isFinal) {
+          finalStr += item[0].transcript;
         } else {
-          interimStr += event.results[i][0].transcript;
+          interimStr += item[0].transcript;
         }
       }
 
+      currentInterimRef.current = interimStr.trim();
+      currentFinalRef.current = finalStr.trim();
+
       if (finalStr) {
-        setTranscript((prev) => (prev ? `${prev} ${finalStr}` : finalStr));
+        setTranscript(finalStr.trim());
       }
-      setInterimTranscript(interimStr);
+      setInterimTranscript(interimStr.trim());
     };
 
     recognition.onerror = (event: any) => {
@@ -82,6 +90,11 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
     recognition.onend = () => {
       setIsListening(false);
+      // If final transcript is empty but interim had words, promote interim to final!
+      const captured = currentFinalRef.current || currentInterimRef.current;
+      if (captured) {
+        setTranscript(captured);
+      }
       setInterimTranscript('');
     };
 
@@ -108,8 +121,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         recognitionRef.current.start();
       }
     } catch (err) {
-      console.warn('Error starting speech recognition:', err);
-      // If already started, restart
+      console.warn('Restarting speech recognition:', err);
       try {
         recognitionRef.current?.stop();
         setTimeout(() => recognitionRef.current?.start(), 150);

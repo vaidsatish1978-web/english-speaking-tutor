@@ -15,10 +15,10 @@ import { RepeatAfterMe } from './components/modes/RepeatAfterMe';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
 import { useProfiles } from './hooks/useProfiles';
-import { sendChatMessage } from './services/gemini';
+import { sendChatMessage, getSavedGeminiKey } from './services/gemini';
 import type { PracticeMode, Language, ChatMessage, RolePlayScenario, DailyTopic as DailyTopicType } from './types';
 import { translations } from './utils/i18n';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export function App() {
   const [lang, setLang] = useState<Language>('en');
@@ -33,6 +33,7 @@ export function App() {
   // Processing state
   const [isProcessing, setIsProcessing] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [hasGeminiKey, setHasGeminiKey] = useState<boolean>(Boolean(getSavedGeminiKey()));
 
   // Hooks
   const {
@@ -48,6 +49,7 @@ export function App() {
   const {
     isListening,
     transcript,
+    interimTranscript,
     isSupported: isSpeechRecSupported,
     errorMessage: speechError,
     startListening,
@@ -76,7 +78,7 @@ export function App() {
   useEffect(() => {
     let welcome = '';
     if (activeProfile.ageCategory === 'little-learner') {
-      welcome = `Hello ${activeProfile.name.split('–')[0]}! 🌟 I am BolBuddy! Tap the big mic below and talk to me! What games do you like to play?`;
+      welcome = `Hello ${activeProfile.name.split('–')[0]}! 🌟 I am BolBuddy! Tap the big mic below and talk to me! Tell me, what did you do today?`;
     } else if (activeProfile.ageCategory === 'student') {
       welcome = `Hi ${activeProfile.name.split('–')[0]}! Welcome to BolEnglish. Ready to practice? What did you do today?`;
     } else {
@@ -226,6 +228,34 @@ export function App() {
         onOpenVoiceSettings={() => setIsVoiceModalOpen(true)}
       />
 
+      {/* AI Key Status Bar Banner */}
+      <div className="max-w-xl mx-auto w-full px-3 pt-1">
+        <button
+          onClick={() => setIsVoiceModalOpen(true)}
+          className={`w-full py-1.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-between border transition cursor-pointer ${
+            hasGeminiKey
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200'
+              : 'bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 hover:bg-indigo-100'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 truncate">
+            {hasGeminiKey ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            )}
+            <span className="truncate">
+              {hasGeminiKey
+                ? (lang === 'hi' ? 'Google Gemini AI सक्रिय है (Active)' : 'Google Gemini AI Connected')
+                : (lang === 'hi' ? 'मुफ्त Gemini AI Key जोड़ें (असीमित बातचीत के लिए)' : 'Connect Free Gemini AI Key (for infinite topics)')}
+            </span>
+          </div>
+          <span className="text-[10px] font-bold underline shrink-0 ml-1">
+            {hasGeminiKey ? (lang === 'hi' ? 'सेटिंग्स' : 'Settings') : (lang === 'hi' ? 'यहाँ क्लिक करें' : 'Click here')}
+          </span>
+        </button>
+      </div>
+
       {/* 2. Practice Mode Selector Tabs */}
       <ModeNavbar
         currentMode={currentMode}
@@ -349,6 +379,13 @@ export function App() {
 
             {/* Bottom Docked Voice Controls */}
             <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex flex-col items-center">
+              {/* Real-time speech preview banner */}
+              {isListening && interimTranscript && (
+                <div className="mb-2 px-3 py-1 rounded-full bg-slate-900/90 text-white text-xs max-w-sm truncate animate-pulse shadow-md border border-slate-700">
+                  🎤 Hearing: "{interimTranscript}"
+                </div>
+              )}
+
               {/* Big Tap to Speak Mic Button */}
               <VoiceButton
                 isListening={isListening}
@@ -399,10 +436,13 @@ export function App() {
         lang={lang}
       />
 
-      {/* Voice Speed & Gender Modal */}
+      {/* Voice Speed, Gender & Gemini Key Modal */}
       <VoiceSettingsModal
         isOpen={isVoiceModalOpen}
-        onClose={() => setIsVoiceModalOpen(false)}
+        onClose={() => {
+          setIsVoiceModalOpen(false);
+          setHasGeminiKey(Boolean(getSavedGeminiKey()));
+        }}
         speed={speed}
         gender={gender}
         onSpeedChange={setSpeed}

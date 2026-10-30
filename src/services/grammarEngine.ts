@@ -16,7 +16,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: `My name is ${m[1]} / I am ${m[1]}`,
     }),
     explanation_en: "Do not use 'Myself' for introductions. Say 'My name is...' or 'I am...'.",
-    explanation_hi: "अपना परिचय देते समय 'Myself' नहीं, 'My name is...' या 'I am...' बोलना चाहिए।",
+    explanation_hi: "परिचय देते समय 'Myself' नहीं, 'My name is...' या 'I am...' बोलें।",
   },
 
   // 2. I has -> I have
@@ -27,18 +27,18 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: 'I have',
     }),
     explanation_en: "Always use 'have' with 'I'. Use 'has' with he/she/it.",
-    explanation_hi: "'I' के साथ हमेशा 'have' लगता है, 'has' केवल he/she/it के साथ लगता है।",
+    explanation_hi: "'I' के साथ हमेशा 'have' लगता है, 'has' नहीं।",
   },
 
   // 3. He/She/It have -> He/She/It has
   {
-    pattern: /\b(he|she|it)\s+have\b/i,
+    pattern: /\b(he|she|it|my\s+friend|my\s+brother|my\s+sister|my\s+mother|my\s+father|the\s+teacher|the\s+boy|the\s+girl)\s+have\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `${m[1]} has`,
     }),
     explanation_en: (m) => `Use 'has' with singular subjects like '${m[1]}'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ 'has' का प्रयोग होता है, 'have' का नहीं।`,
+    explanation_hi: (m) => `'${m[1]}' एकवचन है, इसलिए 'has' लगेगा, 'have' नहीं।`,
   },
 
   // 4. We/They/You has -> have
@@ -60,7 +60,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: 'I am',
     }),
     explanation_en: "Always say 'I am', never 'I is'.",
-    explanation_hi: "'I' के साथ हमेशा 'am' का प्रयोग होता है, 'is' का नहीं।",
+    explanation_hi: "'I' के साथ हमेशा 'am' आता है, 'is' नहीं।",
   },
 
   // 6. You is -> You are
@@ -82,7 +82,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: `${m[1]} are`,
     }),
     explanation_en: (m) => `Use 'are' with plural subjects like '${m[1]}'.`,
-    explanation_hi: (m) => `'${m[1]}' बहुवचन है, इसलिए इसके साथ 'are' का प्रयोग करें।`,
+    explanation_hi: (m) => `'${m[1]}' बहुवचन है, इसलिए 'are' का प्रयोग करें।`,
   },
 
   // 8. He/She are -> He/She is
@@ -93,76 +93,124 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: `${m[1]} is`,
     }),
     explanation_en: (m) => `Use 'is' with singular subjects like '${m[1]}'.`,
-    explanation_hi: (m) => `'${m[1]}' एकवचन है, इसलिए इसके साथ 'is' लगता है।`,
+    explanation_hi: (m) => `'${m[1]}' एकवचन है, इसलिए 'is' लगता है।`,
   },
 
-  // 9. He go / She go -> He goes / She goes
+  // 9. He/She don't -> doesn't
   {
-    pattern: /\b(he|she)\s+go\b/i,
+    pattern: /\b(he|she|it|my\s+brother|my\s+sister)\s+(?:don't|do\s+not)\b/i,
+    fix: (m) => ({
+      original: m[0],
+      corrected: `${m[1]} doesn't`,
+    }),
+    explanation_en: (m) => `Say '${m[1]} doesn't' (does not) instead of don't.`,
+    explanation_hi: (m) => `'${m[1]}' के साथ 'doesn't' (does not) आता है, 'don't' नहीं।`,
+  },
+
+  // 10. He go / She go -> He goes / She goes
+  {
+    pattern: /\b(he|she|my\s+father|my\s+mother|my\s+brother|my\s+sister)\s+go\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `${m[1]} goes`,
     }),
-    explanation_en: (m) => `Add '-es' to the verb with '${m[1]}' in simple present: '${m[1]} goes'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ क्रिया में 's/es' जुड़ता है: '${m[1]} goes'।`,
+    explanation_en: (m) => `Add '-es' to the verb: '${m[1]} goes'.`,
+    explanation_hi: (m) => `'${m[1]}' के साथ क्रिया में 'es' जुड़ेगा: '${m[1]} goes'।`,
   },
 
-  // 10. He play / She play -> plays
+  // 11. He play / She play -> plays
   {
-    pattern: /\b(he|she)\s+play\b/i,
+    pattern: /\b(he|she|my\s+brother|my\s+sister|the\s+boy|the\s+girl)\s+play\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `${m[1]} plays`,
     }),
-    explanation_en: (m) => `Add '-s' to verbs for singular subjects: '${m[1]} plays'.`,
+    explanation_en: (m) => `Add '-s' for singular subjects: '${m[1]} plays'.`,
     explanation_hi: (m) => `'${m[1]}' के साथ क्रिया में 's' जोड़ें: '${m[1]} plays'।`,
   },
 
-  // 11. He eat / She eat -> eats
+  // 12. He/She eat -> eats
   {
-    pattern: /\b(he|she)\s+eat\b/i,
+    pattern: /\b(he|she|my\s+brother|my\s+sister)\s+eat\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `${m[1]} eats`,
     }),
-    explanation_en: (m) => `Say '${m[1]} eats' instead of '${m[1]} eat'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ 'eats' बोलना चाहिए।`,
+    explanation_en: (m) => `Say '${m[1]} eats' with an 's'.`,
+    explanation_hi: (m) => `'${m[1]}' के साथ 'eats' बोलें।`,
   },
 
-  // 12. He like / She like -> likes
+  // 13. My father work / My mother cook
   {
-    pattern: /\b(he|she)\s+like\b/i,
+    pattern: /\b(my\s+father|my\s+mother|my\s+brother|my\s+sister)\s+(work|cook|teach|read)\b/i,
     fix: (m) => ({
       original: m[0],
-      corrected: `${m[1]} likes`,
+      corrected: `${m[1]} ${m[2]}s`,
     }),
-    explanation_en: (m) => `Say '${m[1]} likes' with an 's'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ 'likes' बोलें।`,
+    explanation_en: (m) => `Add '-s' to '${m[2]}': '${m[1]} ${m[2]}s'.`,
+    explanation_hi: (m) => `'${m[1]}' एकवचन है, इसलिए '${m[2]}s' होगा।`,
   },
 
-  // 13. He want / She want -> wants
+  // 14. I like play -> I like to play / I like playing
   {
-    pattern: /\b(he|she)\s+want\b/i,
+    pattern: /\bi\s+like\s+(play|eat|dance|sing|read|draw|cook)\b/i,
     fix: (m) => ({
       original: m[0],
-      corrected: `${m[1]} wants`,
+      corrected: `I like to ${m[1]} / I like ${m[1]}ing`,
     }),
-    explanation_en: (m) => `Say '${m[1]} wants'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ 'wants' बोलें।`,
+    explanation_en: (m) => `Say 'I like to ${m[1]}' or 'I like ${m[1]}ing'.`,
+    explanation_hi: (m) => `'I like' के बाद 'to ${m[1]}' या '${m[1]}ing' बोलें।`,
   },
 
-  // 14. Did went -> did go
+  // 15. I want play -> I want to play
+  {
+    pattern: /\bi\s+want\s+(play|eat|go|sleep|read|buy|watch)\b/i,
+    fix: (m) => ({
+      original: m[0],
+      corrected: `I want to ${m[1]}`,
+    }),
+    explanation_en: (m) => `Add 'to' after want: 'I want to ${m[1]}'.`,
+    explanation_hi: (m) => `'want' के बाद 'to' जोड़ें: 'I want to ${m[1]}'।`,
+  },
+
+  // 16. I am go / I am eat -> I am going / I am eating
+  {
+    pattern: /\bi\s+am\s+(go|eat|play|read|sleep|walk|run|watch|study)\b/i,
+    fix: (m) => {
+      const verb = m[1].toLowerCase();
+      const ing = verb === 'run' ? 'running' : `${verb}ing`;
+      return {
+        original: m[0],
+        corrected: `I am ${ing} / I ${verb}`,
+      };
+    },
+    explanation_en: "Use '-ing' with 'am' for current actions: 'I am going'.",
+    explanation_hi: "'am' के साथ क्रिया में '-ing' लगाएं (जैसे: 'I am going')।",
+  },
+
+  // 17. She is go / He is eat -> She is going
+  {
+    pattern: /\b(he|she)\s+is\s+(go|eat|play|read|sleep|come)\b/i,
+    fix: (m) => ({
+      original: m[0],
+      corrected: `${m[1]} is ${m[2]}ing`,
+    }),
+    explanation_en: (m) => `Use '-ing' after 'is': '${m[1]} is ${m[2]}ing'.`,
+    explanation_hi: "'is' के बाद क्रिया में '-ing' जोड़ें।",
+  },
+
+  // 18. Did went -> did go
   {
     pattern: /\b(did(?:\s+not|\s+n't)?)\s+went\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `${m[1]} go`,
     }),
-    explanation_en: "Always use the first form of the verb (go) after 'did'.",
-    explanation_hi: "'Did' के साथ हमेशा क्रिया की पहली फॉर्म (go) आती है, went नहीं।",
+    explanation_en: "Always use base verb 'go' after 'did'.",
+    explanation_hi: "'Did' के साथ हमेशा पहली फॉर्म 'go' आती है, 'went' नहीं।",
   },
 
-  // 15. Did saw -> did see
+  // 19. Did saw -> did see
   {
     pattern: /\b(did(?:\s+not|\s+n't)?)\s+saw\b/i,
     fix: (m) => ({
@@ -170,21 +218,10 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: `${m[1]} see`,
     }),
     explanation_en: "Use 'see' after 'did', not 'saw'.",
-    explanation_hi: "'Did' के साथ 'saw' नहीं, पहली फॉर्म 'see' आती है।",
+    explanation_hi: "'Did' के बाद पहली फॉर्म 'see' आती है।",
   },
 
-  // 16. Did came -> did come
-  {
-    pattern: /\b(did(?:\s+not|\s+n't)?)\s+came\b/i,
-    fix: (m) => ({
-      original: m[0],
-      corrected: `${m[1]} come`,
-    }),
-    explanation_en: "Use 'come' after 'did'.",
-    explanation_hi: "'Did' के बाद हमेशा पहली फॉर्म 'come' आती है।",
-  },
-
-  // 17. Did ate -> did eat
+  // 20. Did ate -> did eat
   {
     pattern: /\b(did(?:\s+not|\s+n't)?)\s+ate\b/i,
     fix: (m) => ({
@@ -192,32 +229,43 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: `${m[1]} eat`,
     }),
     explanation_en: "Use 'eat' after 'did', not 'ate'.",
-    explanation_hi: "'Did' के साथ 'eat' बोला जाता है।",
+    explanation_hi: "'Did' के साथ पहली फॉर्म 'eat' आती है।",
   },
 
-  // 18. Yesterday I go -> Yesterday I went
+  // 21. Did came -> did come
+  {
+    pattern: /\b(did(?:\s+not|\s+n't)?)\s+came\b/i,
+    fix: (m) => ({
+      original: m[0],
+      corrected: `${m[1]} come`,
+    }),
+    explanation_en: "Use 'come' after 'did', not 'came'.",
+    explanation_hi: "'Did' के बाद 'come' आता है।",
+  },
+
+  // 22. Yesterday I go -> Yesterday I went
   {
     pattern: /\byesterday\s+i\s+go\b/i,
     fix: () => ({
       original: 'yesterday I go',
       corrected: 'yesterday I went',
     }),
-    explanation_en: "When talking about the past ('yesterday'), use past tense 'went'.",
-    explanation_hi: "बीते कल (yesterday) की बात बताने के लिए 'went' का प्रयोग करें।",
+    explanation_en: "Use past tense 'went' with yesterday.",
+    explanation_hi: "बीते कल (yesterday) के लिए 'went' का प्रयोग करें।",
   },
 
-  // 19. Yesterday I eat -> Yesterday I ate
+  // 23. Yesterday I eat -> Yesterday I ate
   {
     pattern: /\byesterday\s+i\s+eat\b/i,
     fix: () => ({
       original: 'yesterday I eat',
       corrected: 'yesterday I ate',
     }),
-    explanation_en: "For past actions, use 'ate' instead of 'eat'.",
-    explanation_hi: "बीते कल के लिए 'ate' का प्रयोग करें।",
+    explanation_en: "Say 'yesterday I ate' (past tense).",
+    explanation_hi: "बीते कल के लिए 'ate' (past tense) का प्रयोग करें।",
   },
 
-  // 20. Yesterday I play -> Yesterday I played
+  // 24. Yesterday I play -> Yesterday I played
   {
     pattern: /\byesterday\s+i\s+play\b/i,
     fix: () => ({
@@ -228,162 +276,114 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     explanation_hi: "बीते कल के लिए 'played' बोलें।",
   },
 
-  // 21. I am agree -> I agree
+  // 25. I am agree -> I agree
   {
     pattern: /\bi\s+am\s+agree\b/i,
     fix: () => ({
       original: 'I am agree',
       corrected: 'I agree',
     }),
-    explanation_en: "'Agree' is already a verb, do not say 'am agree'.",
+    explanation_en: "'Agree' is already a verb, do not add 'am'.",
     explanation_hi: "'Agree' खुद एक क्रिया है, इसके आगे 'am' मत लगाइए।",
   },
 
-  // 22. I am disagree -> I disagree
-  {
-    pattern: /\bi\s+am\s+disagree\b/i,
-    fix: () => ({
-      original: 'I am disagree',
-      corrected: 'I disagree',
-    }),
-    explanation_en: "Say 'I disagree' instead of 'I am disagree'.",
-    explanation_hi: "'I am disagree' नहीं, सीधा 'I disagree' बोलें।",
-  },
-
-  // 23. Cousin brother / sister -> cousin
+  // 26. Cousin brother / sister -> cousin
   {
     pattern: /\bcousin\s+(brother|sister)\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: 'cousin',
     }),
-    explanation_en: "In English, simply say 'cousin' without brother/sister.",
-    explanation_hi: "अंग्रेज़ी में सिर्फ 'cousin' बोला जाता है, brother या sister नहीं जोड़ते।",
+    explanation_en: "Simply say 'cousin' in English.",
+    explanation_hi: "अंग्रेज़ी में सिर्फ 'cousin' बोला जाता है।",
   },
 
-  // 24. Open the light / fan -> turn on
+  // 27. Open the light/fan -> turn on
   {
     pattern: /\bopen\s+the\s+(light|fan|ac|tv|computer)\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `turn on the ${m[1]}`,
     }),
-    explanation_en: (m) => `For electronic appliances, say 'turn on the ${m[1]}'.`,
-    explanation_hi: (m) => `बिजली के उपकरण चालू करने के लिए 'turn on the ${m[1]}' कहते हैं।`,
+    explanation_en: (m) => `For electrical items, say 'turn on the ${m[1]}'.`,
+    explanation_hi: (m) => `बिजली के उपकरण चालू करने के लिए 'turn on the ${m[1]}' कहें।`,
   },
 
-  // 25. Close the light / fan -> turn off
+  // 28. Close the light/fan -> turn off
   {
     pattern: /\bclose\s+the\s+(light|fan|ac|tv|computer)\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `turn off the ${m[1]}`,
     }),
-    explanation_en: (m) => `For appliances, say 'turn off the ${m[1]}'.`,
-    explanation_hi: (m) => `बिजली के उपकरण बंद करने के लिए 'turn off the ${m[1]}' कहते हैं।`,
+    explanation_en: (m) => `For electrical items, say 'turn off the ${m[1]}'.`,
+    explanation_hi: (m) => `उपकरण बंद करने के लिए 'turn off the ${m[1]}' कहें।`,
   },
 
-  // 26. Good in English / Maths -> good at
+  // 29. Two brother / two sister (missing plural 's')
+  {
+    pattern: /\b(two|three|four|five|six|seven|eight|nine|ten|[0-9]+)\s+(brother|sister|friend|apple|cat|dog|book|car|boy|girl)\b/i,
+    fix: (m) => ({
+      original: m[0],
+      corrected: `${m[1]} ${m[2]}s`,
+    }),
+    explanation_en: (m) => `Use plural '${m[2]}s' for numbers greater than one.`,
+    explanation_hi: (m) => `एक से अधिक संख्या होने पर बहुवचन '${m[2]}s' का प्रयोग करें।`,
+  },
+
+  // 30. Childrens -> children
+  {
+    pattern: /\bchildrens\b/i,
+    fix: () => ({
+      original: 'childrens',
+      corrected: 'children',
+    }),
+    explanation_en: "'Children' is already plural of child. Do not add 's'.",
+    explanation_hi: "'Children' खुद बहुवचन है, इसमें 's' नहीं लगाते।",
+  },
+
+  // 31. Good in English -> good at
   {
     pattern: /\bgood\s+in\s+([A-Za-z]+)\b/i,
     fix: (m) => ({
       original: m[0],
       corrected: `good at ${m[1]}`,
     }),
-    explanation_en: "Use 'good at' for skills and subjects, not 'good in'.",
-    explanation_hi: "किसी विषय या हुनर में अच्छे होने के लिए 'good at' बोला जाता है।",
+    explanation_en: "Use 'good at' for subjects and sports.",
+    explanation_hi: "किसी विषय या खेल में अच्छे होने के लिए 'good at' बोलें।",
   },
 
-  // 27. Married with -> married to
-  {
-    pattern: /\bmarried\s+with\b/i,
-    fix: () => ({
-      original: 'married with',
-      corrected: 'married to',
-    }),
-    explanation_en: "Say 'married to', not 'married with'.",
-    explanation_hi: "विवाहित होने के संदर्भ में 'married to' बोला जाता है।",
-  },
-
-  // 28. One of my friend -> one of my friends
-  {
-    pattern: /\bone\s+of\s+my\s+friend\b/i,
-    fix: () => ({
-      original: 'one of my friend',
-      corrected: 'one of my friends',
-    }),
-    explanation_en: "Say 'one of my friends' (plural) because you are choosing from many.",
-    explanation_hi: "कई दोस्तों में से एक की बात हो रही है, इसलिए 'friends' (बहुवचन) आएगा।",
-  },
-
-  // 29. Two years back -> two years ago
-  {
-    pattern: /\b([0-9]+|two|three|four|five)\s+years\s+back\b/i,
-    fix: (m) => ({
-      original: m[0],
-      corrected: `${m[1]} years ago`,
-    }),
-    explanation_en: "Say 'years ago' instead of 'years back'.",
-    explanation_hi: "समय बीतने की बात में 'years back' की जगह 'years ago' कहें।",
-  },
-
-  // 30. Revert back -> revert / reply
-  {
-    pattern: /\brevert\s+back\b/i,
-    fix: () => ({
-      original: 'revert back',
-      corrected: 'revert / reply',
-    }),
-    explanation_en: "'Revert' already means reply, so do not add 'back'.",
-    explanation_hi: "'Revert' का अर्थ ही जवाब देना होता है, इसके साथ 'back' न लगाएं।",
-  },
-
-  // 31. I am knowing -> I know
+  // 32. I am knowing -> I know
   {
     pattern: /\bi\s+am\s+knowing\b/i,
     fix: () => ({
       original: 'I am knowing',
       corrected: 'I know',
     }),
-    explanation_en: "'Know' is a state verb, say 'I know' instead of 'I am knowing'.",
+    explanation_en: "Say 'I know' instead of 'I am knowing'.",
     explanation_hi: "'Know' के साथ '-ing' नहीं लगता, सीधा 'I know' बोलें।",
   },
 
-  // 32. I am eat -> I am eating
+  // 33. One of my friend -> one of my friends
   {
-    pattern: /\bi\s+am\s+(eat|play|read|sleep|walk|run)\b/i,
-    fix: (m) => {
-      const verb = m[1].toLowerCase();
-      const ing = verb === 'run' ? 'running' : `${verb}ing`;
-      return {
-        original: m[0],
-        corrected: `I am ${ing} / I ${verb}`,
-      };
-    },
-    explanation_en: "After 'am', use '-ing' form (I am eating) or say simple present (I eat).",
-    explanation_hi: "'am' के बाद क्रिया में '-ing' लगाएं (जैसे: I am eating)।",
+    pattern: /\bone\s+of\s+my\s+friend\b/i,
+    fix: () => ({
+      original: 'one of my friend',
+      corrected: 'one of my friends',
+    }),
+    explanation_en: "Say 'one of my friends' (plural).",
+    explanation_hi: "कई दोस्तों में से एक, इसलिए 'one of my friends' बोलें।",
   },
 
-  // 33. He do not / She do not -> does not
+  // 34. Told to me -> told me
   {
-    pattern: /\b(he|she|it)\s+do\s+not\b/i,
+    pattern: /\btold\s+to\s+(me|him|her|us|them)\b/i,
     fix: (m) => ({
       original: m[0],
-      corrected: `${m[1]} does not`,
+      corrected: `told ${m[1]}`,
     }),
-    explanation_en: (m) => `Use 'does not' with singular subjects like '${m[1]}'.`,
-    explanation_hi: (m) => `'${m[1]}' के साथ 'do not' नहीं, 'does not' का प्रयोग होता है।`,
-  },
-
-  // 34. Me and my friend went -> My friend and I went
-  {
-    pattern: /\bme\s+and\s+(my\s+friend|him|her)\b/i,
-    fix: (m) => ({
-      original: m[0],
-      corrected: `${m[1]} and I`,
-    }),
-    explanation_en: "Put the other person first and use 'I' as subject: 'My friend and I'.",
-    explanation_hi: "सब्जेक्ट के रूप में दूसरे व्यक्ति को पहले रखें और 'I' का प्रयोग करें।",
+    explanation_en: (m) => `Do not use 'to' after told: 'told ${m[1]}'.`,
+    explanation_hi: (m) => `'told' के बाद 'to' नहीं लगता: सीधा 'told ${m[1]}' बोलें।`,
   },
 
   // 35. What is your good name -> What is your name
@@ -394,13 +394,10 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       corrected: 'what is your name',
     }),
     explanation_en: "In English, simply say 'What is your name?'.",
-    explanation_hi: "अंग्रेज़ी में 'शुभ नाम' के लिए 'good name' नहीं, सिर्फ 'What is your name?' कहते हैं।",
+    explanation_hi: "अंग्रेज़ी में शुभ नाम के लिए सीधा 'What is your name?' बोलें।",
   },
 ];
 
-/**
- * Checks text against all grammar rules and returns the first clear correction.
- */
 export function checkGrammar(text: string): Correction | null {
   for (const rule of GRAMMAR_RULES) {
     const match = rule.pattern.exec(text);
