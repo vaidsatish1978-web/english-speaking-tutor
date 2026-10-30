@@ -1,0 +1,18 @@
+{
+  "name": "BolEnglish - Voice English Speaking Tutor",
+  "short_name": "BolEnglish",
+  "description": "Voice-based English practice for all ages with gentle corrections and Hindi support.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8FAFC",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
