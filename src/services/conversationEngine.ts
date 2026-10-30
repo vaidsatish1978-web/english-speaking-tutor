@@ -19,6 +19,36 @@ export interface ConversationResult {
   new_words: string[];
 }
 
+const NON_NAME_WORDS = new Set([
+  'fine', 'good', 'great', 'happy', 'sad', 'tired', 'hungry', 'sleepy', 'bored', 'sick',
+  'playing', 'eating', 'going', 'studying', 'reading', 'drawing', 'sleeping', 'running',
+  'student', 'boy', 'girl', 'a', 'an', 'the', 'here', 'there', 'ready', 'okay', 'ok',
+  'not', 'doing', 'watching', 'listening', 'learning', 'speaking', 'talking', 'cooking',
+  'seven', 'eight', 'nine', 'ten', 'years', 'old', 'class'
+]);
+
+function extractNameIntro(raw: string): string | null {
+  // Explicit: "my name is Priya", "mera naam Priya hai", "call me Priya"
+  const explicit = raw.match(/(?:my name is|mera naam|call me)\s+([A-Za-z\u0900-\u097F]+)/i);
+  if (explicit) {
+    const candidate = explicit[1].trim();
+    if (!NON_NAME_WORDS.has(candidate.toLowerCase())) {
+      return candidate.charAt(0).toUpperCase() + candidate.slice(1);
+    }
+  }
+
+  // Exact intro: "I am Priya" or "I'm Priya" (only single name after I am)
+  const iAmMatch = raw.match(/^(?:i am|i'm)\s+([A-Za-z]+)$/i);
+  if (iAmMatch) {
+    const candidate = iAmMatch[1].trim();
+    if (!NON_NAME_WORDS.has(candidate.toLowerCase())) {
+      return candidate.charAt(0).toUpperCase() + candidate.slice(1);
+    }
+  }
+
+  return null;
+}
+
 export function generateSmartLocalReply(
   message: string,
   _history: ChatMessage[],
@@ -46,13 +76,10 @@ export function generateSmartLocalReply(
     };
   };
 
-  // 2. Extract Student Name if mentioned
-  const nameMatch = raw.match(/(?:my name is|mera naam|i am|this is|call me|naam hai|नाम)\s+([A-Za-z\u0900-\u097F]+)/i);
-  if (nameMatch) {
-    const candidate = nameMatch[1].trim();
-    if (!/^(fine|good|happy|sad|tired|hungry|eating|playing|going|studying|student|a|the|here|ready|boy|girl)$/i.test(candidate)) {
-      state.studentName = candidate.charAt(0).toUpperCase() + candidate.slice(1);
-    }
+  // 2. Check if student is introducing their name
+  const newName = extractNameIntro(raw);
+  if (newName) {
+    state.studentName = newName;
   }
 
   const namePrefix = state.studentName ? `${state.studentName}` : 'friend';
@@ -190,16 +217,16 @@ export function generateSmartLocalReply(
     );
   }
 
-  // 6. Handle Student Self-Introduction ("My name is...", "I am [Name]", or just single name)
-  if (nameMatch && state.studentName) {
+  // 6. Handle Student Self-Introduction ("My name is...", "I am [Name]") ONLY when introducing!
+  if (newName) {
     return formatReply(
-      `Hello ${state.studentName}! It is so wonderful to meet you. Tell me, which class do you study in, or what is your favorite game to play?`,
+      `Hello ${newName}! It is so wonderful to meet you. Tell me, which class do you study in, or what is your favorite game to play?`,
       ['Wonderful', 'Introduce']
     );
   }
 
   // If user enters just a single capitalized word when asked for name
-  if (/^[A-Z][a-z]{2,15}$/.test(raw) && !state.studentName) {
+  if (/^[A-Z][a-z]{2,15}$/.test(raw) && !state.studentName && !NON_NAME_WORDS.has(raw.toLowerCase())) {
     state.studentName = raw;
     return formatReply(
       `Hello ${raw}! Nice to meet you. Which class do you study in, ${raw}?`,
