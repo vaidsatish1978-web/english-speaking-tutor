@@ -155,7 +155,11 @@ export function App() {
       recordTurn(response.correction, response.new_words);
 
       // 6. Speak the tutor's reply aloud
-      speak(response.reply);
+      let textToSpeak = response.reply;
+      if (response.correction && !textToSpeak.includes(response.correction.corrected)) {
+        textToSpeak = `Good try! Say it like this: "${response.correction.corrected}". ${response.reply}`;
+      }
+      speak(textToSpeak);
 
       // 7. Celebrate if little learner or great sentence
       if (activeProfile.ageCategory === 'little-learner' && !response.correction) {

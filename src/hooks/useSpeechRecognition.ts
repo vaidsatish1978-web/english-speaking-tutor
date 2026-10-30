@@ -137,6 +137,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     } catch (err) {
       console.warn('Error stopping speech recognition:', err);
     }
+    const captured = currentFinalRef.current || currentInterimRef.current;
+    if (captured) {
+      setTranscript(captured);
+    }
     setIsListening(false);
   }, []);
 
